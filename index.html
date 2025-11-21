@@ -102,6 +102,16 @@
       margin-bottom: 1rem;
     }
 
+    /* Stack images vertically only on very narrow screens */
+    @media (max-width: 480px) {
+      .jspsych-html-button-response-btngroup {
+        flex-direction: column;
+      }
+      .image-choice.jspsych-btn {
+        margin: 0.75rem 0;
+      }
+    }
+
     /* Header image + study title on first page */
     .study-header {
       text-align: center;
@@ -148,7 +158,8 @@
 
   var preload = {
     type: 'preload',
-    images: all_image_paths
+    images: all_image_paths,
+    message: '<p><strong>Pre-loading all images.</strong><br>This may take a few seconds on slower connections. Please kindly wait.</p>'
   };
 
   // 3. Consent screen (with header image + study title)
@@ -188,8 +199,6 @@
     on_finish: function(data) {
       data.trial_type_custom = 'consent';
       data.consent_choice = 'agree';
-      // No endExperiment call here: participants who don't want to take part
-      // can simply close the window.
     }
   };
 
@@ -285,7 +294,21 @@
     }
   };
 
-  // 5. Build 20 random A/B pairs
+  // 5. Intro page for comparative image selection
+
+  var image_intro = {
+    type: 'html-button-response',
+    stimulus: `
+      <h2>Comparative Image Selection</h2>
+      <p>The following pages comprise 20 comparison sets of images. Please select which image of each pair you deem to be more realistic.</p>
+    `,
+    choices: ['Begin'],
+    on_finish: function(data) {
+      data.trial_type_custom = 'image_intro';
+    }
+  };
+
+  // 6. Build 20 random A/B pairs
 
   var shuffledA = jsPsych.randomization.shuffle(poolA.slice());
   var shuffledB = jsPsych.randomization.shuffle(poolB.slice());
@@ -310,14 +333,14 @@
     });
   }
 
-  // 6. Image pair trial (2AFC)
+  // 7. Image pair trial (2AFC)
 
   var image_trial = {
     type: 'html-button-response',
     stimulus: function() {
       return `
         <h2>Comparative Image Selection</h2>
-        <p>The following question comprises a pair of images. Please select which one of the two images you consider to be more realistic.</p>
+        <p>Please select which one you perceive to be more realistic.</p>
         <p class="small-note">You can tap or click directly on an image to select it.</p>
       `;
     },
@@ -351,7 +374,7 @@
     randomize_order: false
   };
 
-  // 7. Thank you + submit
+  // 8. Thank you + submit
 
   var thank_you = {
     type: 'html-button-response',
@@ -390,12 +413,13 @@
     }
   };
 
-  // 8. Build and start timeline
+  // 9. Build and start timeline
 
   var timeline = [];
   timeline.push(preload);
   timeline.push(consent);
   timeline.push(participant_info);
+  timeline.push(image_intro);
   timeline.push(image_trials_block);
   timeline.push(thank_you);
   timeline.push(final_confirmation);
