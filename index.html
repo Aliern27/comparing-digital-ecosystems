@@ -112,6 +112,13 @@
       }
     }
 
+    /* Force side-by-side layout on wider screens */
+    @media (min-width: 481px) {
+      .jspsych-html-button-response-btngroup {
+        flex-wrap: nowrap;
+      }
+    }
+
     /* Header image + study title on first page */
     .study-header {
       text-align: center;
