@@ -361,21 +361,39 @@
     },
     button_html: '<button class="jspsych-btn image-choice">%choice%</button>',
     on_finish: function(data) {
-    data.trial_type_custom = 'image_pair';
-    data.a_code     = jsPsych.timelineVariable('a_code', true);
-    data.b_code     = jsPsych.timelineVariable('b_code', true);
-    data.left_code  = jsPsych.timelineVariable('left_code', true);
-    data.right_code = jsPsych.timelineVariable('right_code', true);
-    data.a_on_left  = jsPsych.timelineVariable('a_on_left', true);
-    data.trial_index = jsPsych.timelineVariable('trial_index', true);
+      data.trial_type_custom = 'image_pair';
+      data.a_code     = jsPsych.timelineVariable('a_code', true);
+      data.b_code     = jsPsych.timelineVariable('b_code', true);
+      data.left_code  = jsPsych.timelineVariable('left_code', true);
+      data.right_code = jsPsych.timelineVariable('right_code', true);
+      data.a_on_left  = jsPsych.timelineVariable('a_on_left', true);
+      data.trial_index = jsPsych.timelineVariable('trial_index', true);
 
-    // Convert jsPsych's string value ("0"/"1") into a number
-    var btnIndex = Number(data.button_pressed);
+      // 🔑 Try response first (6.3.1 docs), then button_pressed (older examples)
+      var btnIndex = null;
 
-    data.chosen_side = (btnIndex === 0) ? 'left' : 'right';
-    data.chosen_code = (btnIndex === 0) ? data.left_code : data.right_code;
-    data.chosen_pool = (data.chosen_code === data.a_code) ? 'A' : 'B';
-  }
+      if (data.response !== undefined && data.response !== null) {
+        btnIndex = Number(data.response);
+      } else if (data.button_pressed !== undefined && data.button_pressed !== null) {
+        btnIndex = Number(data.button_pressed);
+      }
+
+      console.log('response:', data.response, 'button_pressed:', data.button_pressed, 'btnIndex:', btnIndex);
+
+      if (btnIndex === 0) {
+        data.chosen_side = 'left';
+        data.chosen_code = data.left_code;
+      } else if (btnIndex === 1) {
+        data.chosen_side = 'right';
+        data.chosen_code = data.right_code;
+      } else {
+        // Fallback to avoid breaking the experiment if something unexpected happens
+        data.chosen_side = 'unknown';
+        data.chosen_code = '';
+      }
+
+      data.chosen_pool = (data.chosen_code === data.a_code) ? 'A' : 'B';
+    }
   };
 
   var image_trials_block = {
