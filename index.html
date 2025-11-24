@@ -361,23 +361,21 @@
     },
     button_html: '<button class="jspsych-btn image-choice">%choice%</button>',
     on_finish: function(data) {
-      data.trial_type_custom = 'image_pair';
-      data.a_code     = jsPsych.timelineVariable('a_code', true);
-      data.b_code     = jsPsych.timelineVariable('b_code', true);
-      data.left_code  = jsPsych.timelineVariable('left_code', true);
-      data.right_code = jsPsych.timelineVariable('right_code', true);
-      data.a_on_left  = jsPsych.timelineVariable('a_on_left', true);
-      data.trial_index = jsPsych.timelineVariable('trial_index', true);
+    data.trial_type_custom = 'image_pair';
+    data.a_code     = jsPsych.timelineVariable('a_code', true);
+    data.b_code     = jsPsych.timelineVariable('b_code', true);
+    data.left_code  = jsPsych.timelineVariable('left_code', true);
+    data.right_code = jsPsych.timelineVariable('right_code', true);
+    data.a_on_left  = jsPsych.timelineVariable('a_on_left', true);
+    data.trial_index = jsPsych.timelineVariable('trial_index', true);
 
-      // 🔑 Use jsPsych's response field (0 = left button, 1 = right button)
-      var btnIndex = (typeof data.response === 'number')
-        ? data.response
-        : parseInt(data.response, 10);
+    // Convert jsPsych's string value ("0"/"1") into a number
+    var btnIndex = Number(data.button_pressed);
 
-      data.chosen_side = (btnIndex === 0) ? 'left' : 'right';
-      data.chosen_code = (btnIndex === 0) ? data.left_code : data.right_code;
-      data.chosen_pool = (data.chosen_code === data.a_code) ? 'A' : 'B';
-    }
+    data.chosen_side = (btnIndex === 0) ? 'left' : 'right';
+    data.chosen_code = (btnIndex === 0) ? data.left_code : data.right_code;
+    data.chosen_pool = (data.chosen_code === data.a_code) ? 'A' : 'B';
+  }
   };
 
   var image_trials_block = {
