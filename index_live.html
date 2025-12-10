@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Comparing Digital Ecosystems</title>
+
+  <!-- jsPsych core and CSS -->
+  <script src="jspsych-6.3.1/jspsych.js"></script>
+  <link rel="stylesheet" href="jspsych-6.3.1/css/jspsych.css">
+
+  <!-- Plugins -->
+  <script src="jspsych-6.3.1/plugins/jspsych-html-button-response.js"></script>
+  <script src="jspsych-6.3.1/plugins/jspsych-survey-html-form.js"></script>
+  <script src="jspsych-6.3.1/plugins/jspsych-preload.js"></script>
+
+  <style>
+    body {
+      background-color: #f5f5f5;
+    }
+    .jspsych-display-element {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 20px 10px 40px;
+      box-sizing: border-box;
+    }
+    h1, h2 {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    p {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.5;
+      text-align: left;
+    }
+    .consent-block p {
+      margin-bottom: 0.6em;
+    }
+
+    .small-note {
+      font-size: 0.9em;
+      color: #555;
+      margin-top: 0.5rem;
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+      text-align: left;
+    }
+
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+
+    select, input[type="radio"] {
+      margin-top: 0.25rem;
+    }
+
+    .radio-group {
+      margin-left: 1rem;
+    }
+
+    .radio-option {
+      margin-bottom: 0.25rem;
+    }
+
+    .image-choice.jspsych-btn {
+      border: none;
+      padding: 0;
+      background: none;
+      box-shadow: none;
+      margin: 0 1rem;
+    }
+
+    .image-choice.jspsych-btn:focus {
+      outline: 3px solid #1976d2;
+    }
+
+    .choice-img {
+      max-width: 40vw;
+      max-height: 60vh;
+      height: auto;
+      width: auto;
+      border-radius: 6px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
+
+    @media (max-width: 768px) {
+      .choice-img {
+        max-width: 80vw;
+        max-height: 50vh;
+      }
+    }
+
+    .jspsych-html-button-response-btngroup {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 2rem;
+      margin-top: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    /* Stack images vertically only on very narrow screens */
+    @media (max-width: 480px) {
+      .jspsych-html-button-response-btngroup {
+        flex-direction: column;
+      }
+      .image-choice.jspsych-btn {
+        margin: 0.75rem 0;
+      }
+    }
+
+    /* Force side-by-side layout on wider screens */
+    @media (min-width: 481px) {
+      .jspsych-html-button-response-btngroup {
+        flex-wrap: nowrap;
+      }
+    }
+
+    /* Header image + study title on first page */
+    .study-header {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+    .study-header-title {
+      font-size: 2rem;
+      margin-top: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .header-img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 6px;
+      margin-bottom: 0.5rem;
+    }
+    /* Make all standard jsPsych buttons larger */
+    .jspsych-btn {
+      font-size: 1.1rem !important;
+      padding: 16px 28px !important;
+      border-radius: 10px !important;
+      min-width: 140px;
+    }
+
+    /* Make them even bigger on small screens */
+    @media (max-width: 480px) {
+      .jspsych-btn {
+        font-size: 1.2rem !important;
+        padding: 20px 32px !important;
+        min-width: 160px;
+      }
+    }
+
+    /* Larger dropdown controls like the age selector (all screen sizes) */
+    select {
+      font-size: 1.1rem;
+      padding: 12px 10px;
+      border-radius: 8px;
+    }
+
+    /* Larger hitbox on very small screens */
+    @media (max-width: 480px) {
+      select {
+        font-size: 1.2rem;
+        padding: 16px 12px;
+      }
+    }
+
+  </style>
+</head>
+<body>
+<div id="jspsych-target"></div>
+
+<script>
+  // 1. Define image pools
+
+  var poolA = [
+    '28DN9','30XH2','3UD2J','7UGBQ','9173N',
+    'CX2OH','FG8LN','FW9RL','I7KVP','LNMS1',
+    'LS5Q7','MOJER','NOMJ2','PL8EB','RFXE1',
+    'T56U5','UUSQV','W4VH7','X14ZY','Z9ETQ'
+  ];
+
+  var poolB = [
+    '0MO7D','2XF3R','34SJZ','4641E','7Z1Q9',
+    'AZCI4','EXO5D','FJKF9','H6DW4','KDERI',
+    'LPJ2H','M4XT7','N63R0','P02N5','PQ2HU',
+    'S6I01','TR1PN','VEQ2Q','WDALO','XWJ5S'
+  ];
+
+  // 2. Preload all images
+
+  var all_image_paths = poolA.concat(poolB).map(function(code) {
+    return 'img/' + code + '.png';
+  });
+
+  var preload = {
+    type: 'preload',
+    images: all_image_paths,
+    message: '<p><strong>Pre-loading all images.</strong><br>This may take about 30 seconds to complete, depending on the speed of your connection. Please kindly wait.</p>'
+  };
+
+  // 3. Consent screen (with header image + study title)
+
+  var consent_html = `
+    <div class="study-header">
+      <img src="header.png" alt="Comparing Digital Ecosystems header" class="header-img">
+      <h1 class="study-header-title">Comparing Digital Ecosystems</h1>
+    </div>
+
+    <div class="consent-block">
+      <h2>Informed Voluntary Consent to Participate in Research Study</h2>
+      <p><strong>Project Title:</strong> Ecosystem Simulation of Virtual Worlds: A Comparative Examination of Outputs</p>
+
+      <p><strong>Invitation to participate, and benefits:</strong> You are invited to participate in a research study with the aim of establishing which of two simulated outputs is more visually realistic.</p>
+
+      <p><strong>Procedures:</strong> During this study, you will be asked to look at images next to each other and choose the one that you deem to look more realistic.</p>
+
+      <p><strong>Recording:</strong> Only details provided by you on these web pages are retained. No personally identifiable information is requested. You do have the option to provide your email address to be informed of the outcomes of this study, but it is optional and will be stored separately from the experiment data.</p>
+
+      <p><strong>Risks:</strong> There are no potentially harmful risks related to your participation in this study.</p>
+
+      <p><strong>Disclaimer/Withdrawal:</strong> Your participation is completely voluntary; you may refuse to participate, and you may withdraw from participation by not clicking the button to submit your choices.</p>
+
+      <p><strong>Confidentiality:</strong> All information collected in this study will be kept private in that you will not be identified by name. Should you choose to provide your email address to be updated on the outcome of this study, it will be stored separately on a database where login credentials with two-factor authentication are required.</p>
+
+      <p><strong>What agreeing means:</strong> By selecting “I agree”, you agree to participate in this research study. The aim, procedures to be used, as well as the potential risks and benefits of your participation have been explained to you, in detail, on this page. Refusal to participate in or withdrawal from this study at any time will have no effect on you in any way. You are free to contact me, to ask questions or request further information, at any time during this research.</p>
+
+      <p class="small-note"><strong>Please click “I agree” to take part.</strong></p>
+    </div>
+  `;
+
+  var consent = {
+    type: 'html-button-response',
+    stimulus: consent_html,
+    choices: ['I agree'],
+    on_finish: function(data) {
+      data.trial_type_custom = 'consent';
+      data.consent_choice = 'agree';
+    }
+  };
+
+  // 4. Participant information
+
+  var ageOptions = '';
+  for (var age = 18; age <= 100; age++) {
+    ageOptions += '<option value="' + age + '">' + age + '</option>';
+  }
+
+  var participant_form_html = `
+    <h1>Participant Information</h1>
+
+    <div class="form-group">
+      <label for="age">Please select your age (in years) from the dropdown below.</label>
+      <select id="age" name="age" required>
+        <option value="">Select your age...</option>
+        ${ageOptions}
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Please select the most appropriate answer to complete the following statement: I hike</label>
+      <div class="radio-group">
+        <div class="radio-option">
+          <label><input type="radio" name="hike_freq" value="Never" required> Never</label>
+        </div>
+        <div class="radio-option">
+          <label><input type="radio" name="hike_freq" value="Occasionally (once or twice a year)"> Occasionally (once or twice a year)</label>
+        </div>
+        <div class="radio-option">
+          <label><input type="radio" name="hike_freq" value="Sometimes (once or twice a month)"> Sometimes (once or twice a month)</label>
+        </div>
+        <div class="radio-option">
+          <label><input type="radio" name="hike_freq" value="Regularly (once a week)"> Regularly (once a week)</label>
+        </div>
+        <div class="radio-option">
+          <label><input type="radio" name="hike_freq" value="Often (several times a week)"> Often (several times a week)</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Please select the most appropriate answer to complete the following statement: I play video games</label>
+      <div class="radio-group">
+        <div class="radio-option">
+          <label><input type="radio" name="games_freq" value="Never" required> Never</label>
+        </div>
+        <div class="radio-option">
+          <label><input type="radio" name="games_freq" value="Occasionally (once or twice a year)"> Occasionally (once or twice a year)</label>
+        </div>
+        <div class="radio-option">
+          <label><input type="radio" name="games_freq" value="Sometimes (once or twice a month)"> Sometimes (once or twice a month)</label>
+        </div>
+        <div class="radio-option">
+          <label><input type="radio" name="games_freq" value="Regularly (once a week)"> Regularly (once a week)</label>
+        </div>
+        <div class="radio-option">
+          <label><input type="radio" name="games_freq" value="Often (several times a week)"> Often (several times a week)</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Please select the most appropriate answer to complete the following statement: I enjoy taking walks or spending time in nature</label>
+      <div class="radio-group">
+        <div class="radio-option">
+          <label><input type="radio" name="nature_freq" value="Never" required> Never</label>
+        </div>
+        <div class="radio-option">
+          <label><input type="radio" name="nature_freq" value="Occasionally (once or twice a year)"> Occasionally (once or twice a year)</label>
+        </div>
+        <div class="radio-option">
+          <label><input type="radio" name="nature_freq" value="Sometimes (once or twice a month)"> Sometimes (once or twice a month)</label>
+        </div>
+        <div class="radio-option">
+          <label><input type="radio" name="nature_freq" value="Regularly (once a week)"> Regularly (once a week)</label>
+        </div>
+        <div class="radio-option">
+          <label><input type="radio" name="nature_freq" value="Often (several times a week)"> Often (several times a week)</label>
+        </div>
+      </div>
+    </div>
+  `;
+
+  var participant_info = {
+    type: 'survey-html-form',
+    preamble: '',
+    html: participant_form_html,
+    button_label: 'Continue',
+    on_finish: function(data) {
+      data.trial_type_custom = 'participant_info';
+    }
+  };
+
+  // 5. Intro page for comparative image selection
+
+  var image_intro = {
+    type: 'html-button-response',
+    stimulus: `
+      <h2>Comparative Image Selection</h2>
+      <p>The following pages comprise 20 comparison sets of images. Please select which image of each pair you consider to be more realistic.</p>
+    `,
+    choices: ['Begin'],
+    on_finish: function(data) {
+      data.trial_type_custom = 'image_intro';
+    }
+  };
+
+  // 6. Build 20 random A/B pairs
+
+  var shuffledA = jsPsych.randomization.shuffle(poolA.slice());
+  var shuffledB = jsPsych.randomization.shuffle(poolB.slice());
+
+  var trialVariables = [];
+  for (var i = 0; i < 20; i++) {
+    var a_code = shuffledA[i];
+    var b_code = shuffledB[i];
+
+    var order = jsPsych.randomization.shuffle(['A', 'B']);
+    var left_code  = (order[0] === 'A') ? a_code : b_code;
+    var right_code = (order[1] === 'A') ? a_code : b_code;
+    var a_on_left = (left_code === a_code);
+
+    trialVariables.push({
+      trial_index: i,
+      a_code: a_code,
+      b_code: b_code,
+      left_code: left_code,
+      right_code: right_code,
+      a_on_left: a_on_left
+    });
+  }
+
+  // 7. Image pair trial (2AFC)
+
+    var image_trial = {
+    type: 'html-button-response',
+    stimulus: function() {
+      return `
+        <h2>Comparative Image Selection</h2>
+        <p>Please select which one you perceive to be more realistic.</p>
+        <p class="small-note">You can tap or click directly on an image to select it.</p>
+      `;
+    },
+    choices: function() {
+      var left  = jsPsych.timelineVariable('left_code');
+      var right = jsPsych.timelineVariable('right_code');
+      return [
+        '<img src="img/' + left  + '.png" class="choice-img" alt="Left image">',
+        '<img src="img/' + right + '.png" class="choice-img" alt="Right image">'
+      ];
+    },
+    button_html: '<button class="jspsych-btn image-choice">%choice%</button>',
+    on_finish: function(data) {
+      data.trial_type_custom = 'image_pair';
+      data.a_code     = jsPsych.timelineVariable('a_code', true);
+      data.b_code     = jsPsych.timelineVariable('b_code', true);
+      data.left_code  = jsPsych.timelineVariable('left_code', true);
+      data.right_code = jsPsych.timelineVariable('right_code', true);
+      data.a_on_left  = jsPsych.timelineVariable('a_on_left', true);
+      data.trial_index = jsPsych.timelineVariable('trial_index', true);
+
+      // 🔑 Try response first (6.3.1 docs), then button_pressed (older examples)
+      var btnIndex = null;
+
+      if (data.response !== undefined && data.response !== null) {
+        btnIndex = Number(data.response);
+      } else if (data.button_pressed !== undefined && data.button_pressed !== null) {
+        btnIndex = Number(data.button_pressed);
+      }
+
+      console.log('response:', data.response, 'button_pressed:', data.button_pressed, 'btnIndex:', btnIndex);
+
+      if (btnIndex === 0) {
+        data.chosen_side = 'left';
+        data.chosen_code = data.left_code;
+      } else if (btnIndex === 1) {
+        data.chosen_side = 'right';
+        data.chosen_code = data.right_code;
+      } else {
+        // Fallback to avoid breaking the experiment if something unexpected happens
+        data.chosen_side = 'unknown';
+        data.chosen_code = '';
+      }
+
+      data.chosen_pool = (data.chosen_code === data.a_code) ? 'A' : 'B';
+    }
+  };
+
+  var image_trials_block = {
+    timeline: [image_trial],
+    timeline_variables: trialVariables,
+    randomize_order: false
+  };
+
+  // 8. Thank you + submit
+
+  var thank_you = {
+    type: 'html-button-response',
+    stimulus: `
+      <h1>Thank You</h1>
+      <p>Should you be satisfied with your choices and willing for them to be used in this study, please click "Submit" below. A gentle reminder that, due to the anonymous nature of the responses, you will no longer be able to withdraw from this study once you click "Submit".</p>
+      <p>If you would like to provide your email address to receive information regarding the outcome of this study, the option to enter your email address is available in a separate link on the submission confirmation page.</p>
+    `,
+    choices: ['Submit'],
+    on_finish: function(data) {
+      data.trial_type_custom = 'submit_screen';
+
+      var allData = jsPsych.data.get().values();
+
+      fetch('https://script.google.com/macros/s/AKfycbxVnKUweujtRY4sRAerS5KO0c7w4hIc0_KeOCyImVuCuExcIYPpK3e1aR5GHZh_KG2Q/exec', {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(allData)
+      });
+    }
+  };
+
+  var final_confirmation = {
+    type: 'html-button-response',
+    stimulus: `
+      <p>Thank you. Your response has been recorded.</p>
+      <p>Please enter your email address in the form found at the following link should you wish to receive updates on the outcome of this study:</p>
+      <p><a href="https://forms.gle/hvN7YhJYDuXFkoUH7" target="_blank">Email update form</a></p>
+    `,
+    choices: ['Close'],
+    on_finish: function(data) {
+      data.trial_type_custom = 'final_message';
+    }
+  };
+
+  // 9. Build and start timeline
+
+  var timeline = [];
+  timeline.push(preload);
+  timeline.push(consent);
+  timeline.push(participant_info);
+  timeline.push(image_intro);
+  timeline.push(image_trials_block);
+  timeline.push(thank_you);
+  timeline.push(final_confirmation);
+
+  jsPsych.init({
+    timeline: timeline,
+    display_element: 'jspsych-target',
+    show_progress_bar: true,
+    auto_update_progress_bar: true
+  });
+</script>
+</body>
+</html>
